@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 import logging
 from app.graph import queryHandler
+from concurrent.futures import ThreadPoolExecutor
 # Load env immediately
 load_dotenv(override=True)
 
@@ -78,44 +79,59 @@ def upload():
         if auth_header:
             headers['Authorization'] = auth_header
 
-        # Upload to Embedding API
-        embedding_res_data = {}
-        try:
-            url1 = f"{embedding_url_base}/upload"
+        url1 = f"{embedding_url_base}/upload"
+        files1 = {
+            "file": (file.filename, file_bytes, file.mimetype)
+        }
+
+        url2 = f"{graph_url_base}/upload"
+        files2 = {
+            "file": (file.filename, file_bytes, file.mimetype)
+        }
+        data2 = {
+            "user_id": userid
+        }
+
+        def upload_to_embedding():
             logger.info(f"Uploading to Embedding API: {url1}")
-            files1 = {
-                "file": (file.filename, file_bytes, file.mimetype)
-            }
             response1 = requests.post(url1, files=files1, headers=headers, timeout=30)
-            embedding_res_data = {
+            logger.info(f"Embedding API response: {response1.status_code}")
+            return {
                 "status": response1.status_code,
                 "body": response1.text
             }
-            logger.info(f"Embedding API response: {response1.status_code}")
-        except Exception as e:
-            logger.error(f"Failed to upload to Embedding API: {e}")
-            embedding_res_data = {"error": str(e)}
 
-        # Upload to Graph API
-        graph_res_data = {}
-        try:
-            url2 = f"{graph_url_base}/upload"
+        def upload_to_graph():
             logger.info(f"Uploading to Graph API: {url2}")
-            files2 = {
-                "file": (file.filename, file_bytes, file.mimetype)
-            }
-            data2 = {
-                "user_id": userid
-            }
             response2 = requests.post(url2, files=files2, data=data2, headers=headers, timeout=30)
-            graph_res_data = {
+            logger.info(f"Graph API response: {response2.status_code}")
+            return {
                 "status": response2.status_code,
                 "body": response2.text
             }
-            logger.info(f"Graph API response: {response2.status_code}")
+
+        embedding_res_data = {}
+        graph_res_data = {}
+
+        try:
+            with ThreadPoolExecutor(max_workers=2) as executor:
+                future_embedding = executor.submit(upload_to_embedding)
+                future_graph = executor.submit(upload_to_graph)
+
+                try:
+                    embedding_res_data = future_embedding.result()
+                except Exception as e:
+                    logger.error(f"Failed to upload to Embedding API: {e}")
+                    embedding_res_data = {"error": str(e)}
+
+                try:
+                    graph_res_data = future_graph.result()
+                except Exception as e:
+                    logger.error(f"Failed to upload to Graph API: {e}")
+                    graph_res_data = {"error": str(e)}
         except Exception as e:
-             logger.error(f"Failed to upload to Graph API: {e}")
-             graph_res_data = {"error": str(e)}
+            logger.error(f"Unexpected error during parallel execution: {e}")
+            return jsonify({"error": "Internal server error"}), 500
 
         return jsonify({
             "embeddings msg": embedding_res_data,
