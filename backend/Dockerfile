@@ -22,5 +22,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Expose port 7860 for Hugging Face Spaces
 EXPOSE 7860
 
-# Command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:7860", "main:app"]
+# Command to run the application using multi-threaded gthread workers for concurrency
+CMD ["gunicorn", "--workers", "3", "--threads", "4", "--worker-class", "gthread", "--bind", "0.0.0.0:7860", "main:app"]
