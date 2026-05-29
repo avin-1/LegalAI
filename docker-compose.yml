@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  embedding-api:
+    build:
+      context: ./EmbeddingAPI
+    # Optional: Expose on different host port for direct debugging
+    ports:
+      - "7861:7860"
+    env_file:
+      - ./EmbeddingAPI/.env
+
+  graph-api:
+    build:
+      context: ./GraphAPI
+    # Optional: Expose on different host port for direct debugging
+    ports:
+      - "7862:7860"
+    env_file:
+      - ./GraphAPI/.env
+
+  backend:
+    build:
+      context: ./Backend
+    deploy:
+      replicas: 3
+    environment:
+      - REDIS_URL1=redis://redis:6379
+      - EMBEDDING_API_URL=http://embedding-api:7860
+      - GRAPH_API_URL=http://graph-api:7860
+      - PORT=7860
+    depends_on:
+      - redis
+      - embedding-api
+      - graph-api
+    env_file:
+      - ./Backend/.env
