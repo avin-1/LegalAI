@@ -1,0 +1,11 @@
+chromadb>=1.4.0
+flask>=3.1.2
+python-dotenv>=1.0.1
+pymupdf4llm>=0.2.7
+pymupdf-layout>=1.26.6
+python-docx>=1.2.0
+pymupdf4llm[pymupdf-layout]
+redis
+langgraph
+gunicorn
+PyJWT>=2.8.0

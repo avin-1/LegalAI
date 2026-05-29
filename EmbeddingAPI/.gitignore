@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+.venv/
+venv/
+ENV/
+
+# Environment Variables
+.env
+
+# Local Database & Storage
+chromadb_store/
+uploads/
+*.sqlite3
+*.bin
+
+# Editor directories
+.vscode/
+.idea/

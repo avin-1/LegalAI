@@ -1,0 +1,8 @@
+python-dotenv
+langgraph
+redis
+langchain-groq
+gunicorn
+Flask[async]
+requests
+PyJWT>=2.8.0

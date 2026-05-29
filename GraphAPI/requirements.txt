@@ -1,0 +1,11 @@
+flask
+python-dotenv
+gunicorn
+requests
+pymupdf
+langchain-groq
+langchain-experimental
+langchain-neo4j
+langchain
+redis
+PyJWT>=2.8.0

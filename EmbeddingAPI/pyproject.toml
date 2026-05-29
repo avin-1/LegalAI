@@ -1,0 +1,19 @@
+[project]
+name = "embeddigapi"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "chromadb>=1.4.0",
+    "flask>=3.1.2",
+    "gunicorn>=25.3.0",
+    "jwt>=1.4.0",
+    "langgraph>=1.0.5",
+    "pyjwt>=2.8.0",
+    "pymupdf-layout>=1.26.6",
+    "pymupdf4llm[pymupdf-layout]>=0.2.7",
+    "python-docx>=1.2.0",
+    "python-dotenv>=1.0.1",
+    "redis>=7.1.0",
+]
